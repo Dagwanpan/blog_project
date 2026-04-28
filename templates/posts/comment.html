@@ -1,0 +1,80 @@
+<div style="margin-left: {{ level }}px; border-left:1px solid #ccc; padding-left:10px; margin-top:10px;">
+    
+    <!-- 📝 Comment text -->
+    <p>{{ comment.content }}</p>
+
+    <!-- 🖼️ Display image if it exists -->
+    {% if comment.image %}
+        <img src="{{ comment.image.url }}" width="150" style="display:block; margin-bottom:10px;">
+    {% endif %}
+
+    <!-- 👤 Author and timestamp -->
+    <em><strong>{{ comment.author.username }}</strong></em>
+    <br>
+    <small>{{ comment.created_at }}</small>
+
+    <!-- ============================= -->
+    <!-- 🔁 REPLY FORM (FIXED VERSION) -->
+    <!-- ============================= -->
+
+    <!-- 
+        IMPORTANT FIXES:
+        1. enctype="multipart/form-data" → REQUIRED for file/image upload
+        2. Added <input type="file" name="image"> → THIS was missing (main bug)
+        3. Unique form ID → prevents duplicate IDs in recursive loop
+    -->
+    <form method="POST" enctype="multipart/form-data" id="comment-form-{{ comment.id }}" style="margin-top:5px;">
+        {% csrf_token %}
+
+        <!-- 
+            Hidden field to tell Django this is a reply,
+            not a top-level comment 
+        -->
+        <input type="hidden" name="parent_id" value="{{ comment.id }}">
+
+        <!-- Comment content -->
+        <textarea name="content" placeholder="Reply..." required></textarea><br>
+
+        <!-- 🔥 FIX: Image upload field (this was missing before) -->
+        <input type="file" name="image" accept="image/*">
+
+        <!-- Submit reply -->
+        <button type="submit">Reply</button>
+    </form>
+
+    <!-- ============================= -->
+    <!-- ✏️ EDIT / DELETE (OWNER ONLY) -->
+    <!-- ============================= -->
+
+    <!-- 
+        Only show edit/delete if the logged-in user
+        is the author of the comment 
+    -->
+    {% comment %} {% if comment.author == user %}
+        
+        <!-- Edit comment -->
+        <a href="{% url 'edit_comment' comment.id %}">Edit</a>
+
+        <!-- Delete comment -->
+        <form action="{% url 'delete_comment' comment.id %}" method="POST" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Delete</button>
+        </form>
+
+    {% endif %} {% endcomment %}
+
+    <!-- ============================= -->
+    <!-- 🔁 RECURSION (Nested Replies) -->
+    <!-- ============================= -->
+
+    <!-- 
+        This loops through replies of this comment
+        and renders the SAME template again
+
+        level|add:20 → increases indentation for nested replies
+    -->
+    {% for reply in comment.replies.all %}
+        {% include "posts/comment.html" with comment=reply level=level|add:20 %}
+    {% endfor %}
+
+</div>

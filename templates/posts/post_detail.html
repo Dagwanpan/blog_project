@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="post-card">
+
+    <h2>{{ post.title }}</h2>
+    
+    {% if post.image %}
+    <img src="{{ post.image.url }}" width="250">
+{% endif %}
+
+    <p>{{ post.content }}</p>
+
+    <br>
+
+    <small>
+        Created at: {{ post.created_at }} <br>
+        Author: {{ post.author.username }}<br><hr>        
+        <span style="color: #007bff;"><em>💬 {{ post.comments.count }} Comments</em></span><br><br>
+    </small>
+
+    <a href="{% url 'home' %}" class="btn">⬅ Back</a>
+
+    {% if post.author == user %}
+         <a href="{% url 'update_post' post.id %}" class="btn edit">Edit</a>
+
+         <form action="{% url 'delete_post' post.id %}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?');">
+            {% csrf_token %}
+            <button type="submit" class="btn delete">Delete</button>
+        </form>
+    {% endif %}
+
+</div>
+<hr>
+<!-- 🟢 COMMENTS SECTION -->
+<h3>Comments</h3>
+
+<!-- Add Comment Form -->
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add Comment</button>
+</form>
+
+<hr>
+
+<!-- 🔁 ROOT COMMENTS ONLY -->
+{% for comment in comments %}
+    {% include "posts/comment.html" with comment=comment level=0 %}
+{% empty %}
+    <p>No comments yet.</p>
+{% endfor %}
+{% endblock %}

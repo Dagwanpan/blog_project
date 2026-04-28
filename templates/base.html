@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dagwan Blog | Django Portfolio Project</title>
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{% static 'blog/style.css' %}">
+
+    <!-- Optional Google Font (clean look) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header class="main-header">
+    <div class="container header-flex">
+
+        <!-- Branding -->
+        <div class="logo">
+            <h1><a href="{% url 'home' %}">Dagwan<span>Blog</span></a></h1>
+            <p class="tagline">A Django-powered blogging platform</p>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav-links">
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'create_post' %}">Create Post</a>
+
+            {% if user.is_authenticated %}
+                <span class="welcome">Hi, {{ user.username }}</span>
+                <a href="{% url 'logout' %}" class="btn-nav">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-nav">Login</a>
+                <a href="{% url 'register' %}" class="btn-nav">Register</a>
+            {% endif %}
+        </nav>
+
+    </div>
+</header>
+
+<!-- Hero Section (Portfolio feel) -->
+<section class="hero">
+    <div class="container">
+        <h2>Welcome to My Django Blog Project</h2>
+        <p>
+            This is a full-featured blog application built with Django,
+            featuring authentication, CRUD operations, and comment system.
+        </p>
+    </div>
+</section>
+
+<main class="container">
+    {% block content %}
+    {% endblock %}
+</main>
+
+<footer class="main-footer">
+    <div class="container footer-grid">
+
+        <div>
+            <h3>About This Project</h3>
+            <p>
+                Built with Django to demonstrate backend development skills,
+                authentication, database handling, and dynamic templates.
+            </p>
+        </div>
+
+        <div>
+            <h3>Tech Stack</h3>
+            <ul>
+                <li>Django</li>
+                <li>Python</li>
+                <li>SQLite</li>
+                <li>HTML & CSS</li>
+            </ul>
+        </div>
+
+        <div>
+            <h3>Contact</h3>
+            <p>Email: dagwanpanandanladi@gmail.com</p>
+            <p>GitHub: github.com/yourusername</p>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 Dagwan Pan'an Danladi | Django Blog Portfolio Project</p>
+    </div>
+</footer>
+
+</body>
+</html>
