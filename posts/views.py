@@ -15,7 +15,7 @@ def home(request):
 @login_required
 def create_post(request):
     if request.method == 'POST': 
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, request.FILES)
         
         if form.is_valid():
             post = form.save(commit=False)
@@ -38,7 +38,7 @@ def update_post(request, id):
         return redirect('home')
     
     if request.method == 'POST':
-        form = PostForm(request.POST, instance=post)
+        form = PostForm(request.POST, request.FILES, instance=post)
         
         if form.is_valid():
             form.save()
