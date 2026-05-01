@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="form-container">
+
+    <h2 class="form-title">Update Post</h2>
+
+    <form method="POST" enctype="multipart/form-data" class="form-card">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <small class="error">{{ field.errors }}</small>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn-submit">Update Post</button>
+    </form>
+
+</div>
+
+{% endblock %}

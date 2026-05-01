@@ -1,0 +1,51 @@
+/* =========================
+   ⭐ STAR RATING (PRO UI)
+========================= */
+
+.star-group {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    gap: 6px;
+    align-items: center;
+}
+
+/* Hide radio buttons but keep accessible */
+.star-group input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Star label base */
+.star-group label {
+    font-size: 34px;
+    color: #d1d5db; /* neutral gray */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1;
+    user-select: none;
+}
+
+/* Hover effect (gold preview) */
+.star-group label:hover,
+.star-group label:hover ~ label {
+    color: #fbbf24; /* amber gold */
+    transform: scale(1.08);
+}
+
+/* Selected state */
+.star-group input:checked ~ label {
+    color: #f59e0b; /* deeper gold */
+}
+
+/* Smooth active click feedback */
+.star-group label:active {
+    transform: scale(0.95);
+}
+
+/* Keyboard accessibility (important for professional apps) */
+.star-group input:focus + label {
+    outline: 2px solid #3b82f6;
+    outline-offset: 4px;
+    border-radius: 4px;
+}

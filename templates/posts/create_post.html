@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'blog/create_post.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="form-container">
+
+    <h2 class="form-title">Create New Post</h2>
+
+    <form method="POST" enctype="multipart/form-data" class="form-card">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+
+                {% if field.errors %}
+                    <small class="error">{{ field.errors }}</small>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn-submit">Save Post</button>
+    </form>
+
+</div>
+
+{% endblock %}

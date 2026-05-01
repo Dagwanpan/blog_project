@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="post-card">
+
+    <h2>{{ post.title }}</h2>
+    
+    {% if post.image %}
+        <img src="{{ post.image.url }}" width="250">
+    {% endif %}
+
+    <p>{{ post.content }}</p>
+
+    <small>
+        Created at: {{ post.created_at }} <br>
+        Author: {{ post.user.username }}<br><hr>        
+        <span style="color: #007bff;">
+            <em>💬 {{ post.comments.count }} Comments</em>
+        </span><br>
+        <span style="color: #ff9800;">
+    <em>⭐ {{ post.avg_rating|default:0|floatformat:1 }} ({{ post.total_ratings }} Ratings)</em>
+</span>
+    </small>
+
+    <br><br>
+
+    <a href="{% url 'home' %}" class="btn">⬅ Back</a>
+
+    {% if post.author == user %}
+        <a href="{% url 'update_post' post.id %}" class="btn edit">Edit</a>
+
+        <form action="{% url 'delete_post' post.id %}" method="POST" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn delete">Delete</button>
+        </form>
+    {% endif %}
+
+</div>
+
+<h3 id="rating">Rating</h3>
+
+<p>Average Rating: ⭐ {{ avg_rating|floatformat:1 }}</p>
+
+{% if user.is_authenticated %}
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="rating" value="1">
+
+    <label>Rate this post:</label>
+<div class="star-group">
+    <input type="radio" name="value" id="star5" value="5"><label for="star5">★</label>
+    <input type="radio" name="value" id="star4" value="4"><label for="star4">★</label>
+    <input type="radio" name="value" id="star3" value="3"><label for="star3">★</label>
+    <input type="radio" name="value" id="star2" value="2"><label for="star2">★</label>
+    <input type="radio" name="value" id="star1" value="1"><label for="star1">★</label>
+</div>
+{% comment %} 
+    <select name="value">
+        <option value="1">1 ⭐</option>
+        <option value="2">2 ⭐⭐</option>
+        <option value="3">3 ⭐⭐⭐</option>
+        <option value="4">4 ⭐⭐⭐⭐</option>
+        <option value="5">5 ⭐⭐⭐⭐⭐</option>
+    </select> {% endcomment %}
+
+    <button type="submit">Submit Rating</button>
+</form>
+
+{% else %}
+
+<p><a href="{% url 'login' %}">Login</a> to rate this post.</p>
+
+{% endif %}
+<hr>
+
+<!-- 🟢 ADD COMMENT -->
+<h3>Add Comment</h3>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add Comment</button>
+</form>
+
+<hr>
+
+<!-- 🟢 COMMENTS -->
+<h3>Comments</h3>
+
+{% for comment in comments %}
+    {% include "posts/comment.html" with comment=comment level=0 %}
+{% empty %}
+    <p>No comments yet.</p>
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% comment %} {% load socialaccount %}} {% endcomment %}
+
+{% block content %}
+
+<h2>Register</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+{% for field in form %}
+    <div style="margin-bottom: 15px;">
+        
+        <label>{{ field.label }}</label><br>
+        {{ field }}
+
+        {% if field.errors %}
+            <div style="color: red; margin-top: 5px;">
+                {{ field.errors }}
+            </div>
+        {% endif %}
+
+    </div>
+{% endfor %}
+
+<button type="submit">Register</button> 
+
+<!-- Link to redirect existing users to Login -->
+<p style="margin-top: 15px;">
+    Already have an account? <a href="{% url 'login' %}">Login here</a>.
+</p>
+
+{% comment %} <a href="{% provider_login_url 'google' %}">
+    Sign up with Google
+</a> {% endcomment %}
+
+</form>
+
+{% endblock %}
