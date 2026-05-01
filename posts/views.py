@@ -48,3 +48,14 @@ def post_detail(request, id):
     return render(request, 'posts/post_detail.html', {
         'post': post
     })
+
+# Delete post by Id
+def delete_post(request, id):
+    post = get_object_or_404(Post, id=id)
+    
+    if request.method == 'POST':
+        post.delete()
+        
+    return render(request, 'posts/delete_post.html', {
+        'post': post
+    })
