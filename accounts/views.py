@@ -17,3 +17,8 @@ def register(request):
     return render(request, 'accouts/register.html', {
         'form': form        
     })
+
+# Logout user
+def logout_user(request):
+    logout(request)
+    return reidrec('home')
