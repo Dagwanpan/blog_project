@@ -40,3 +40,11 @@ def update_post(request, id):
     return render(request, 'posts/update_post.html', {
         'form': form
     })
+
+# Display Post detail by id
+def post_detail(request, id):
+    post = get_object_or_404(Post, id=id)
+    
+    return render(request, 'posts/post_detail.html', {
+        'post': post
+    })
