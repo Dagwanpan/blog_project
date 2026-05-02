@@ -9,4 +9,12 @@ class PostForm(forms.ModelForm):
             'title',
             'content',
             'image'
+        ]
+
+# Comment form
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment 
+        fields = [
+            'content'
         ]      
