@@ -21,4 +21,4 @@ def register(request):
 # Logout user
 def logout_user(request):
     logout(request)
-    return reidrec('home')
+    return redirect('home')
