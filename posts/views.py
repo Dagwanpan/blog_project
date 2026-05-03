@@ -58,7 +58,8 @@ def update_post(request, id):
 def post_detail(request, id):
     post = get_object_or_404(Post, id=id)
     
-    if request.method ==  'POST':
+    if request.method == 'POST':
+        
         if not request.user.is_authenticated:
             return redirect('login')
         
@@ -66,22 +67,21 @@ def post_detail(request, id):
         if form.is_valid():
             comment = form.save(commit=False)
             comment.post = post
-            comment.user = request.user
-        
-        parent_id = request.POST.get('parent_id')
-        if parent_id:
-            comment.parent = Comment.objects.get(id=parent_id)
+            comment.user = request.user 
             
-        comment.save()
-        
-        return redirect('post_detail', id=post.id)
-    
+            parent_id = request.POST.get('parent_id')
+            if parent_id:
+                comment.parent = Comment.objects.get(id=parent_id)
+            
+            comment.save()
+            
+            return redirect('post_detail', id=post.id)
     else:
         form = CommentForm()
-    
+        
     comments = post.comments.select_related('user').filter(
         parent=None
-        ).order_by('-created_at')
+    ).order_by('-created_at')
     
     return render(request, 'posts/post_detail.html', {
         'post': post,
@@ -89,6 +89,41 @@ def post_detail(request, id):
         'form': form
     })
     
+# Edit comment
+@login_required
+def edit_comment(request, id):
+    comment = get_object_or_404(Comment, id=id)
+    
+    if comment.user != request.user:
+        return redirect('login')
+    
+    if request.method == 'POST':
+        
+        form = CommentForm(request.POST, request.FILES, instance=comment)
+        if form.is_valid():
+            form.save()
+            return redirect(f'/post/{comment.post.id}/#comments')
+    else:
+        form = CommentForm(instance=comment)
+    
+    return render(request, 'posts/edit_comment.html', {
+        'form': form
+    })
+
+# Delete comment by id
+@login_required
+def delete_comment(request, id):
+    comment = get_object_or_404(Comment, id=id)
+    
+    if comment.user != request.user:
+        return redirect('login')
+    
+    if request.method =='POST':
+        post_id = comment.post.id
+        comment.delete()
+        
+        return redirect(f'/post/{post_id}#comments')     
+
 # Delete post by Id
 @login_required
 def delete_post(request, id):
