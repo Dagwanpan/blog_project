@@ -25,7 +25,7 @@ def create_post(request):
             post = form.save(commit=False)
             post.user = request.user
             post.save()
-            return redirect('home')
+            return redirect(f'/post/{post.id}/#create_post')
     else:
         form = PostForm()
     
@@ -46,7 +46,7 @@ def update_post(request, id):
         
         if form.is_valid():
             form.save()
-            return redirect('home')
+            return redirect(f'/post/{post.id}/#update_post')
     else:
         form = PostForm(instance=post)
     
