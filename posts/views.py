@@ -1,15 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Count, Avg
+from django.db.models import Count
 from django.contrib.auth.decorators import login_required
 from .models import Post, Comment
 from .forms import PostForm, CommentForm
 
 # Home page
 def home(request):
-    posts = Post.objects.select_related('user').prefetch_related(
-        'comments').annotate(
-        total_comments=Count('comments')
-    ).order_by('-created_at')
+    posts = Post.objects.select_related(
+        'author'
+        ).prefetch_related(
+        'comments'
+        ).annotate(
+        total_comments=Count(
+            'comments'
+            )
+    ).order_by(
+        '-created_at'
+        )
         
     return render(request, 'posts/home.html', {
         'posts': posts
@@ -23,7 +30,7 @@ def create_post(request):
         
         if form.is_valid():
             post = form.save(commit=False)
-            post.user = request.user
+            post.author = request.user
             post.save()
             return redirect(f'/post/{post.id}/#create_post')
     else:
@@ -38,7 +45,7 @@ def create_post(request):
 def update_post(request, id):
     post = get_object_or_404(Post, id=id)
     
-    if post.user != request.user:
+    if post.author != request.user:
         return redirect('home')
     
     if request.method == 'POST':
@@ -67,7 +74,7 @@ def post_detail(request, id):
         if form.is_valid():
             comment = form.save(commit=False)
             comment.post = post
-            comment.user = request.user 
+            comment.author = request.user 
             
             parent_id = request.POST.get('parent_id')
             if parent_id:
@@ -79,9 +86,13 @@ def post_detail(request, id):
     else:
         form = CommentForm()
         
-    comments = post.comments.select_related('user').filter(
+    comments = post.comments.select_related(
+        'author'
+        ).filter(
         parent=None
-    ).order_by('-created_at')
+    ).order_by(
+        '-created_at'
+        )
     
     return render(request, 'posts/post_detail.html', {
         'post': post,
@@ -94,7 +105,7 @@ def post_detail(request, id):
 def edit_comment(request, id):
     comment = get_object_or_404(Comment, id=id)
     
-    if comment.user != request.user:
+    if comment.author != request.user:
         return redirect('login')
     
     if request.method == 'POST':
@@ -115,7 +126,7 @@ def edit_comment(request, id):
 def delete_comment(request, id):
     comment = get_object_or_404(Comment, id=id)
     
-    if comment.user != request.user:
+    if comment.author != request.user:
         return redirect('login')
     
     if request.method =='POST':
@@ -129,7 +140,7 @@ def delete_comment(request, id):
 def delete_post(request, id):
     post = get_object_or_404(Post, id=id)
     
-    if post.user != request.user:
+    if post.author != request.user:
         return redirect('home')
     
     if request.method == 'POST':
