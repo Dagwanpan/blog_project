@@ -91,7 +91,7 @@ def profile(request):
     user_comments = request.user.comment_set.all()
     
     return render(request, 'posts/profile.html', {
-        'profile_form': profile_form
+        'profile_form': profile_form,
         'user_form': user_form,
         'password_form': password_form,
         'profile': profile,
