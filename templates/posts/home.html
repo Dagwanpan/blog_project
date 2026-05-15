@@ -26,7 +26,21 @@
 
     <div class="post-meta">
         <span>📅 {{ post.created_at }}</span>
-        <span>Posted by: 👤 {{ post.user.username }}</span>
+        <span>Posted by:
+
+{% if post.author.profile and post.author.profile.image %}
+    <img src="{{ post.author.profile.image.url }}"
+         width="25"
+         height="25"
+         style="border-radius:50%; object-fit:cover; vertical-align:middle;">
+{% else %}
+    <img src="/media/default.jpg"
+         width="25"
+         height="25"
+         style="border-radius:50%; object-fit:cover; vertical-align:middle;">
+{% endif %}
+
+{{ post.author.username }}</span>
     </div>
     <small>
     <p class="comment-count">
@@ -43,7 +57,7 @@
     <div class="post-actions">
         <a href="{% url 'post_detail' post.id %}" class="btn">Read More</a>
 
-        {% if post.user == user %}
+        {% if post.author == user %}
             <a href="{% url 'update_post' post.id %}" class="btn edit">Edit</a>
 
             <form action="{% url 'delete_post' post.id %}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this post?');">

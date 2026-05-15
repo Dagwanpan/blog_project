@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>My Dashboard</h2>
+
+<!-- Profile Info -->
+{% if profile.image %}
+    <img src="{{ profile.image.url }}" width="150" style="border-radius:50%;">
+{% else %}
+    <img src="/media/default.jpg" width="150" style="border-radius:50%;">
+{% endif %}
+<h3>
+    {{ user.first_name }} {{ user.last_name }}
+</h3>
+
+<p>@{{ user.username }}</p>
+
+<p>{{ user.email }}</p>
+
+<p>{{ profile.bio }}</p>
+
+<hr>
+
+<!-- UPDATE PROFILE -->
+<h3>Update Profile</h3>
+
+<form method="POST" enctype="multipart/form-data">
+
+    {% csrf_token %}
+
+    {{ user_form.as_p }}
+    {{ profile_form.as_p }}
+
+    <button type="submit" name="update_profile">
+        Save Changes
+    </button>
+
+</form>
+
+<hr>
+
+<!-- CHANGE PASSWORD -->
+<h3>Change Password</h3>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    {{ password_form.as_p }}
+
+    <button type="submit" name="change_password">
+        Change Password
+    </button>
+
+</form>
+
+<hr>
+
+<!-- DELETE ACCOUNT -->
+<h3>Delete Account</h3>
+
+<form method="POST"
+      onsubmit="return confirm('Are you sure you want to delete your account permanently?');">
+
+    {% csrf_token %}
+
+    <button type="submit" name="delete_account">
+        Delete My Account
+    </button>
+
+</form>
+
+<hr>
+
+<!-- USER POSTS -->
+<h3>My Posts</h3>
+
+{% for post in user_posts %}
+
+    <p>
+        <a href="{% url 'post_detail' post.id %}">
+            {{ post.title }}
+        </a>
+    </p>
+
+{% empty %}
+
+    <p>No posts yet.</p>
+
+{% endfor %}
+
+<hr>
+
+<!-- USER COMMENTS -->
+<h3>My Comments</h3>
+
+{% for comment in user_comments %}
+
+    <p>
+        <a href="{% url 'post_detail' comment.post.id %}#comment-{{ comment.id }}">
+            {{ comment.content }}
+        </a>
+    </p>
+
+{% empty %}
+
+    <p>No comments yet.</p>
+
+{% endfor %}
+
+{% endblock %}
