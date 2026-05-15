@@ -25,7 +25,7 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.author.username
+        return self.author.username if self.author else f"Anonymous: {self.content[:20]}"
 
 # Profile Model
 class Profile(models.Model):
@@ -50,5 +50,6 @@ class Profile(models.Model):
 def create_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.get_or_create(user=instance)
+    
         
     

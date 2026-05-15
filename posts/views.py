@@ -24,14 +24,29 @@ def home(request):
         'posts': posts
     })
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Count
+from django.contrib.auth import update_session_auth_hash, logout
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.decorators import login_required
+from .models import Post, Comment, Profile
+from .forms import PostForm, CommentForm, ProfileForm, UserUpdateForm
+
+# Home page
+def home(request):
+    posts = Post.objects.select_related('author').prefetch_related('comments').annotate(
+        total_comments=Count('comments')
+    ).order_by('-created_at')
+        
+    return render(request, 'posts/home.html', {'posts': posts})
+
 # Profile Page
 @login_required
 def profile(request):
+    # Safe get_or_create handles pre-existing users without profile entries
+    profile, created = Profile.objects.get_or_create(user=request.user)
     
-    profile = request.user.profile
-    
-    if request.method ==  'POST':
-        
+    if request.method == 'POST':
         # Profile form
         profile_form = ProfileForm(
             request.POST,
@@ -39,9 +54,9 @@ def profile(request):
             instance=profile
         )
         
-        # User Form
+        # User Form (Fixed payload mapping bug)
         user_form = UserUpdateForm(
-            request.user,
+            request.POST,
             instance=request.user
         )
         
@@ -53,7 +68,6 @@ def profile(request):
         
         # Update profile + username/email
         if 'update_profile' in request.POST:
-            
             if profile_form.is_valid() and user_form.is_valid():
                 profile_form.save()
                 user_form.save()
@@ -61,33 +75,24 @@ def profile(request):
         
         # Change password
         elif 'change_password' in request.POST:
-            
             if password_form.is_valid():
-                
                 user = password_form.save()
-                
-                # Important: keep user logged in
                 update_session_auth_hash(request, user)
+                return redirect('profile')
         
-        # Delete user account
+        # Delete user account (Fixed redirect crash bug)
         elif 'delete_account' in request.POST:
-            
             user = request.user
-            
             logout(request)
-            
             user.delete()
-            return redirect('profile')
-    
+            return redirect('home') # Safely routes to home or login page
+            
     else:
         profile_form = ProfileForm(instance=profile)
-        
         user_form = UserUpdateForm(instance=request.user)
-        
         password_form = PasswordChangeForm(request.user)
     
     user_posts = request.user.post_set.all()
-    
     user_comments = request.user.comment_set.all()
     
     return render(request, 'posts/profile.html', {
