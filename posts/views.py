@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count
+from django.contrib.auth import update_session_auth_hash, logout
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
-from .models import Post, Comment
-from .forms import PostForm, CommentForm
+from .models import Post, Comment, Profile
+from .forms import PostForm, CommentForm, ProfileForm, UserUpdateForm
 
 # Home page
 def home(request):
@@ -21,8 +23,83 @@ def home(request):
     return render(request, 'posts/home.html', {
         'posts': posts
     })
+
+# Profile Page
+@login_required
+def profile(request):
     
-# Creat post
+    profile = request.user.profile
+    
+    if request.method ==  'POST':
+        
+        # Profile form
+        profile_form = ProfileForm(
+            request.POST,
+            request.FILES,
+            instance=profile
+        )
+        
+        # User Form
+        user_form = UserUpdateForm(
+            request.user,
+            instance=request.user
+        )
+        
+        # Password Form
+        password_form = PasswordChangeForm(
+            request.user,
+            request.POST
+        )
+        
+        # Update profile + username/email
+        if 'update_profile' in request.POST:
+            
+            if profile_form.is_valid() and user_form.is_valid():
+                profile_form.save()
+                user_form.save()
+                return redirect('profile')
+        
+        # Change password
+        elif 'change_password' in request.POST:
+            
+            if password_form.is_valid():
+                
+                user = password_form.save()
+                
+                # Important: keep user logged in
+                update_session_auth_hash(request, user)
+        
+        # Delete user account
+        elif 'delete_account' in request.POST:
+            
+            user = request.user
+            
+            logout(request)
+            
+            user.delete()
+            return redirect('profile')
+    
+    else:
+        profile_form = ProfileForm(instance=profile)
+        
+        user_form = UserUpdateForm(instance=request.user)
+        
+        password_form = PasswordChangeForm(request.user)
+    
+    user_posts = request.user.post_set.all()
+    
+    user_comments = request.user.comment_set.all()
+    
+    return render(request, 'posts/profile.html', {
+        'profile_form': profile_form
+        'user_form': user_form,
+        'password_form': password_form,
+        'profile': profile,
+        'user_posts': user_posts,
+        'user_comments': user_comments
+    })
+        
+# Create post
 @login_required
 def create_post(request):
     if request.method == 'POST':
